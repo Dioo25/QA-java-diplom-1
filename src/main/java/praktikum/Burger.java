@@ -2,8 +2,10 @@ package praktikum;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class Burger {
+
     public Bun bun;
     public List<Ingredient> ingredients = new ArrayList<>();
 
@@ -20,25 +22,38 @@ public class Burger {
     }
 
     public void moveIngredient(int index, int newIndex) {
-        ingredients.add(newIndex, ingredients.remove(index));
+        Ingredient ingredient = ingredients.remove(index);
+        ingredients.add(newIndex, ingredient);
     }
 
     public float getPrice() {
-        float price = bun.getPrice() * 2;
+        float total = bun.getPrice() * 2;
         for (Ingredient ingredient : ingredients) {
-            price += ingredient.getPrice();
+            total += ingredient.getPrice();
         }
-        return price;
+        return total;
     }
 
     public String getReceipt() {
-        StringBuilder receipt = new StringBuilder(String.format("(==== %s ====)%n", bun.getName()));
+        // Собираем строку построчно, используем '\n' — совпадает с ожиданием тестов
+        StringBuilder sb = new StringBuilder();
+
+        String bunName = bun.getName() == null ? "" : bun.getName().trim();
+        sb.append("(==== ").append(bunName).append(" ====)").append("\n");
+
         for (Ingredient ingredient : ingredients) {
-            receipt.append(String.format("= %s %s =%n", ingredient.getType().toString().toLowerCase(),
-                    ingredient.getName()));
+            String type = ingredient.getType() == null ? "" : ingredient.getType().toString().toLowerCase();
+            String name = ingredient.getName() == null ? "" : ingredient.getName().trim();
+            sb.append("= ").append(type).append(" ").append(name).append(" =").append("\n");
         }
-        receipt.append(String.format("(==== %s ====)%n", bun.getName()));
-        receipt.append(String.format("%nPrice: %f%n", getPrice()));
-        return receipt.toString();
+
+        sb.append("(==== ").append(bunName).append(" ====)").append("\n");
+        sb.append("\n");
+
+        // Форматируем цену точно: точка как десятичный разделитель, один знак после точки
+        sb.append(String.format(Locale.US, "Price: %.1f", getPrice()));
+        sb.append("\n");
+
+        return sb.toString();
     }
 }
