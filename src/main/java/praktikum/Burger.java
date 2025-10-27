@@ -18,41 +18,66 @@ public class Burger {
     }
 
     public void removeIngredient(int index) {
-        ingredients.remove(index);
+        if (index >= 0 && index < ingredients.size()) {
+            ingredients.remove(index);
+        }
     }
 
     public void moveIngredient(int index, int newIndex) {
+        if (index < 0 || index >= ingredients.size()) {
+            return;
+        }
+
+        // если newIndex больше допустимого — помещаем в конец
+        if (newIndex < 0) {
+            newIndex = 0;
+        } else if (newIndex > ingredients.size()) {
+            newIndex = ingredients.size();
+        }
+
         Ingredient ingredient = ingredients.remove(index);
-        ingredients.add(newIndex, ingredient);
+
+        // при добавлении в конец size уже уменьшился на 1 — нужно пересчитать
+        if (newIndex > ingredients.size()) {
+            ingredients.add(ingredient);
+        } else {
+            ingredients.add(newIndex, ingredient);
+        }
     }
 
     public float getPrice() {
-        float total = bun.getPrice() * 2;
+        float total = 0f;
+        if (bun != null) {
+            total += bun.getPrice() * 2;
+        }
         for (Ingredient ingredient : ingredients) {
-            total += ingredient.getPrice();
+            if (ingredient != null) {
+                total += ingredient.getPrice();
+            }
         }
         return total;
     }
 
     public String getReceipt() {
-        // Собираем строку построчно, используем '\n' — совпадает с ожиданием тестов
         StringBuilder sb = new StringBuilder();
 
-        String bunName = bun.getName() == null ? "" : bun.getName().trim();
+        String bunName = (bun != null && bun.getName() != null) ? bun.getName().trim() : "";
+
         sb.append("(==== ").append(bunName).append(" ====)").append("\n");
 
         for (Ingredient ingredient : ingredients) {
-            String type = ingredient.getType() == null ? "" : ingredient.getType().toString().toLowerCase();
-            String name = ingredient.getName() == null ? "" : ingredient.getName().trim();
-            sb.append("= ").append(type).append(" ").append(name).append(" =").append("\n");
+            if (ingredient != null) {
+                String type = ingredient.getType() == null ? "" : ingredient.getType().toString().toLowerCase();
+                String name = ingredient.getName() == null ? "" : ingredient.getName().trim();
+                sb.append("= ").append(type).append(" ").append(name).append(" =").append("\n");
+            } else {
+                sb.append("=  =").append("\n");
+            }
         }
 
         sb.append("(==== ").append(bunName).append(" ====)").append("\n");
         sb.append("\n");
-
-        // Форматируем цену точно: точка как десятичный разделитель, один знак после точки
-        sb.append(String.format(Locale.US, "Price: %.1f", getPrice()));
-        sb.append("\n");
+        sb.append(String.format(Locale.US, "Price: %.1f", getPrice())).append("\n");
 
         return sb.toString();
     }
